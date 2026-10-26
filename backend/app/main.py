@@ -1,8 +1,10 @@
 from datetime import time
 from functools import lru_cache
+from pathlib import Path  # NEW
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # NEW
 
 from . import analysis
 from .data import load_actuals, load_forecasts
@@ -60,3 +62,10 @@ def _horizon():
 @app.get("/api/horizon")
 def horizon():
     return _horizon()
+
+
+# NEW: Docker mein built React app "static" folder mein hogi. Use "/" pe dikhao.
+# Laptop pe "static" folder nahi hai, isliye wahan ye kuch nahi karega.
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
